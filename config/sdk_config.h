@@ -38,6 +38,15 @@
  * 
  */
 
+// ADDED BY SIGURD
+
+#ifndef FDS_VIRTUAL_PAGES_RESERVED
+#define FDS_VIRTUAL_PAGES_RESERVED 0
+#endif
+
+// End ADDED BY SIGURD
+
+
 
 #ifndef SDK_CONFIG_H
 #define SDK_CONFIG_H
