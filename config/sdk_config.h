@@ -1245,6 +1245,10 @@
 #ifndef CLOCK_ENABLED
 #define CLOCK_ENABLED 1
 #endif
+
+#ifndef NRF_CLOCK_ENABLED
+#define NRF_CLOCK_ENABLED 1		//Quick fix for nRF5 Thread and Zigbee SDK
+#endif
 // <o> CLOCK_CONFIG_LF_SRC  - LF Clock Source
  
 // <0=> RC 
@@ -2523,7 +2527,7 @@
  
 
 #ifndef NRFX_PRS_BOX_2_ENABLED
-#define NRFX_PRS_BOX_2_ENABLED 0
+#define NRFX_PRS_BOX_2_ENABLED 1
 #endif
 
 // <q> NRFX_PRS_BOX_3_ENABLED  - Enables box 3 in the module.
@@ -2537,7 +2541,7 @@
  
 
 #ifndef NRFX_PRS_BOX_4_ENABLED
-#define NRFX_PRS_BOX_4_ENABLED 1
+#define NRFX_PRS_BOX_4_ENABLED 0		//Has been disabled for OpenThread, NUS (Nordic Uart service might depend on this? UART0 UARTE0)
 #endif
 
 // <e> NRFX_PRS_CONFIG_LOG_ENABLED - Enables logging in the module.
@@ -4409,7 +4413,12 @@
 #endif
 // <o> NRFX_UART0_ENABLED - Enable UART0 instance 
 #ifndef NRFX_UART0_ENABLED
-#define NRFX_UART0_ENABLED 1
+#define NRFX_UART0_ENABLED 0
+#endif
+
+// <o> NRFX_UART1_ENABLED - Enable UART0 instance 
+#ifndef NRFX_UART1_ENABLED
+#define NRFX_UART1_ENABLED 1
 #endif
 
 // <o> NRFX_UART_DEFAULT_CONFIG_HWFC  - Hardware Flow Control
@@ -5722,13 +5731,13 @@
  
 
 #ifndef UART_LEGACY_SUPPORT
-#define UART_LEGACY_SUPPORT 1
+#define UART_LEGACY_SUPPORT 0
 #endif
 
 // <e> UART0_ENABLED - Enable UART0 instance
 //==========================================================
 #ifndef UART0_ENABLED
-#define UART0_ENABLED 1
+#define UART0_ENABLED 0
 #endif
 // <q> UART0_CONFIG_USE_EASY_DMA  - Default setting for using EasyDMA
  
@@ -5742,7 +5751,7 @@
 // <e> UART1_ENABLED - Enable UART1 instance
 //==========================================================
 #ifndef UART1_ENABLED
-#define UART1_ENABLED 0
+#define UART1_ENABLED 1
 #endif
 // </e>
 
@@ -6023,7 +6032,7 @@
 // <0=> 0 
 
 #ifndef APP_UART_DRIVER_INSTANCE
-#define APP_UART_DRIVER_INSTANCE 0
+#define APP_UART_DRIVER_INSTANCE 1
 #endif
 
 // </e>
@@ -6504,7 +6513,7 @@
 // <e> MEM_MANAGER_ENABLED - mem_manager - Dynamic memory allocator
 //==========================================================
 #ifndef MEM_MANAGER_ENABLED
-#define MEM_MANAGER_ENABLED 0
+#define MEM_MANAGER_ENABLED 1
 #endif
 // <o> MEMORY_MANAGER_SMALL_BLOCK_COUNT - Size of each memory blocks identified as 'small' block.  <0-255> 
 
@@ -12513,6 +12522,155 @@
 
 
 // </e>
+
+
+// <e> FDS_ENABLED - fds - Flash data storage module
+//==========================================================
+#ifndef FDS_ENABLED
+#define FDS_ENABLED 1
+#endif
+// <h> Pages - Virtual page settings
+
+// <i> Configure the number of virtual pages to use and their size.
+//==========================================================
+// <o> FDS_VIRTUAL_PAGES - Number of virtual flash pages to use. 
+// <i> One of the virtual pages is reserved by the system for garbage collection.
+// <i> Therefore, the minimum is two virtual pages: one page to store data and one page to be used by the system for garbage collection.
+// <i> The total amount of flash memory that is used by FDS amounts to @ref FDS_VIRTUAL_PAGES * @ref FDS_VIRTUAL_PAGE_SIZE * 4 bytes.
+
+#ifndef FDS_VIRTUAL_PAGES
+#define FDS_VIRTUAL_PAGES 3
+#endif
+
+// <o> FDS_VIRTUAL_PAGE_SIZE  - The size of a virtual flash page.
+ 
+
+// <i> Expressed in number of 4-byte words.
+// <i> By default, a virtual page is the same size as a physical page.
+// <i> The size of a virtual page must be a multiple of the size of a physical page.
+// <1024=> 1024 
+// <2048=> 2048 
+
+#ifndef FDS_VIRTUAL_PAGE_SIZE
+#define FDS_VIRTUAL_PAGE_SIZE 1024
+#endif
+
+// <o> FDS_VIRTUAL_PAGES_RESERVED - The number of virtual flash pages that are used by other modules. 
+// <i> FDS module stores its data in the last pages of the flash memory.
+// <i> By setting this value, you can move flash end address used by the FDS.
+// <i> As a result the reserved space can be used by other modules.
+
+#ifndef FDS_VIRTUAL_PAGES_RESERVED
+#define FDS_VIRTUAL_PAGES_RESERVED 0
+#endif
+
+// </h> 
+//==========================================================
+
+// <h> Backend - Backend configuration
+
+// <i> Configure which nrf_fstorage backend is used by FDS to write to flash.
+//==========================================================
+// <o> FDS_BACKEND  - FDS flash backend.
+ 
+
+// <i> NRF_FSTORAGE_SD uses the nrf_fstorage_sd backend implementation using the SoftDevice API. Use this if you have a SoftDevice present.
+// <i> NRF_FSTORAGE_NVMC uses the nrf_fstorage_nvmc implementation. Use this setting if you don't use the SoftDevice.
+// <1=> NRF_FSTORAGE_NVMC 
+// <2=> NRF_FSTORAGE_SD 
+
+#ifndef FDS_BACKEND
+#define FDS_BACKEND 2
+#endif
+
+// </h> 
+//==========================================================
+
+// <h> Queue - Queue settings
+
+//==========================================================
+// <o> FDS_OP_QUEUE_SIZE - Size of the internal queue. 
+// <i> Increase this value if you frequently get synchronous FDS_ERR_NO_SPACE_IN_QUEUES errors.
+
+#ifndef FDS_OP_QUEUE_SIZE
+#define FDS_OP_QUEUE_SIZE 4
+#endif
+
+// </h> 
+//==========================================================
+
+// <h> CRC - CRC functionality
+
+//==========================================================
+// <e> FDS_CRC_CHECK_ON_READ - Enable CRC checks.
+
+// <i> Save a record's CRC when it is written to flash and check it when the record is opened.
+// <i> Records with an incorrect CRC can still be 'seen' by the user using FDS functions, but they cannot be opened.
+// <i> Additionally, they will not be garbage collected until they are deleted.
+//==========================================================
+#ifndef FDS_CRC_CHECK_ON_READ
+#define FDS_CRC_CHECK_ON_READ 1
+#endif
+// <o> FDS_CRC_CHECK_ON_WRITE  - Perform a CRC check on newly written records.
+ 
+
+// <i> Perform a CRC check on newly written records.
+// <i> This setting can be used to make sure that the record data was not altered while being written to flash.
+// <1=> Enabled 
+// <0=> Disabled 
+
+#ifndef FDS_CRC_CHECK_ON_WRITE
+#define FDS_CRC_CHECK_ON_WRITE 0
+#endif
+
+// </e>
+
+// </h> 
+//==========================================================
+
+// <h> Users - Number of users
+
+//==========================================================
+// <o> FDS_MAX_USERS - Maximum number of callbacks that can be registered. 
+#ifndef FDS_MAX_USERS
+#define FDS_MAX_USERS 4
+#endif
+
+// </h> 
+//==========================================================
+
+// </e>
+
+
+// </h> 
+//==========================================================
+
+// <h> OpenThread 
+
+//==========================================================
+// <h> openthread - OpenThread stack
+
+//==========================================================
+// <o> THREAD_PANID - 802.15.4 PAN ID used by Thread  <0-65535> 
+
+
+// <i> 802.15.4 PAN ID used by Thread. Defaults to 0xABCD.
+
+#ifndef THREAD_PANID
+#define THREAD_PANID 43981
+#endif
+
+// <o> THREAD_CHANNEL - 802.15.4 channel used by Thread  <11-26> 
+
+
+// <i> 802.15.4 channel used by Thread. Defaults to 11.
+
+#ifndef THREAD_CHANNEL
+#define THREAD_CHANNEL 11
+#endif
+
+// </h> 
+//==========================================================
 
 // </h> 
 //==========================================================
