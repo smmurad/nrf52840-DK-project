@@ -147,8 +147,6 @@ QueueHandle_t poseControllerQ = 0;
 QueueHandle_t scanStatusQ = 0;
 QueueHandle_t queue_microsd = 0;
 
-
-
 // Flag to indicate connection status. Interrupt can change handshook status
 uint8_t gHandshook = false;
 uint8_t gPaused = false;
@@ -196,22 +194,14 @@ static void user_task(void *arg) {
     //UNUSED_PARAMETER(arg);
     //initialization of modules should be done after FreeRtos startup
     taskENTER_CRITICAL();
-    NRF_LOG_INFO("1");
     motor_init();
-    NRF_LOG_INFO("2");
     servo_init();
-    NRF_LOG_INFO("3");
     encoder_init_int();
     //encoder_with_counter_init();
-    NRF_LOG_INFO("4");
     taskEXIT_CRITICAL();
-    NRF_LOG_INFO("5");
     i2c_init();
-    NRF_LOG_INFO("6");
     vTaskDelay(30);
-    NRF_LOG_INFO("7");
     IMU_init();
-    NRF_LOG_INFO("8");
 
     vTaskDelay(1500);
     setMotorSpeedReference(60,60);
@@ -229,7 +219,6 @@ static void user_task(void *arg) {
     
     //vTaskDelay(5000);
 
-    
     //char str1[20];
     //char str2[20];
     //char str3[20];
@@ -246,13 +235,6 @@ static void user_task(void *arg) {
     NRF_LOG_INFO("User task: init complete");
     while(true){
         vTaskDelay(1000);
-        
-        
-		
-		
-		
-		
-		
 		
 		// Test-function, sends targetX and targetY to controller some time after initialization, used to test waypoints without server running.
 		if(testWaypoint){
@@ -288,55 +270,14 @@ static void log_init(void) {
     NRF_LOG_DEFAULT_BACKENDS_INIT();
 } */
 
-int main(void) {
-    bsp_board_init(BSP_INIT_LEDS);
-    bool erase_bonds;
-    clock_init();
-    ir_init();
-
-    
+void pos_estimate_init()
+{
     position_estimate_t pos_est = {0,0,0};
     set_position_estimate(&pos_est);
+}
 
-/**
-	* The reset-reason functions are extremely useful as they help you rule out
-	* issues with power supply without having to resort to a oscilloscope.
-	*/
-#if !NRF_LOG_ENABLED || !NRF_LOG_BACKEND_RTT_ENABLED
-    //char const * error_msg;
-    //vTraceEnable(TRC_START_AWAIT_HOST);
-    //vTraceEnable(TRC_INIT);
-    //error_msg = xTraceGetLastError();
-#endif
-
-/*
-	* The reset-reason functions are extremely useful as they help you rule out
-	* issues with power supply without having to resort to a oscilloscope.
-	*/
-    //sd_power_reset_reason_get(&reset_reason);
-    //sd_power_reset_reason_clr(0xFFFFFFFF);
-
-/**
-	* The reset-reason functions are extremely useful as they help you rule out
-	* issues with power supply without having to resort to a oscilloscope.
-	*/
-// RecorderDataPtr
-#if !NRF_LOG_ENABLED || !NRF_LOG_BACKEND_RTT_ENABLED
-   //vTraceEnable(TRC_START);
-   //vTraceEnable(TRC_START_AWAIT_HOST);
-   //error_msg = xTraceGetLastError();
-#endif
-
-    // Do not start any interrupt that uses system functions before system initialisation.
-    // The best solution is to start the OS before any other initalisation.
-    BLE_init(); //Log_init ran from here, must be initialized after uart is initialized
-    arq_init();
-
-    #if NRF_LOG_ENABLED
-		if (pdPASS != xTaskCreate(logger_thread, "LOGGER", 256, NULL, 1, &m_logger_thread))
-			APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-	#endif
-    
+void init_queues()
+{
     //initialize queues
 	queue_display = xQueueCreate(5, sizeof(display_operation_t));       //For sending things to display
 	queue_microsd = xQueueCreate(5, sizeof(microsd_write_operation_t)); //For writing things to micro SD
@@ -345,9 +286,11 @@ int main(void) {
     encoderTicksToMotorSpeedControllerQ = xQueueCreate(100, sizeof(encoderTicks)); 
     encoderTicksToMotorPositionControllerQ = xQueueCreate(100, sizeof(encoderTicks)); 
     encoderTicksToEstimatorTaskQ = xQueueCreate(100, sizeof(encoderTicks)); 
+} 
 
-
-	//initialize mutexes
+void init_mutex()
+{
+    //initialize mutexes
 	mutex_spi = xSemaphoreCreateMutex();
     mutex_i2c = xSemaphoreCreateMutex();
 	xPoseMutex = xSemaphoreCreateMutex();       // Global variables for robot pose. Only updated from estimator, accessed from many
@@ -355,108 +298,73 @@ int main(void) {
     xSemaphoreGive(xTickBSem);
 	xControllerBSem = xSemaphoreCreateBinary(); // Estimator to Controller synchronization
 	xCommandReadyBSem = xSemaphoreCreateBinary();
-	
-	
-    if (pdPASS != xTaskCreate(display_task, "DISP", 128, NULL, 1, &handle_display_task))
-        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM); 
+}
 
-    
+int main(void) 
+{
+    bsp_board_init(BSP_INIT_LEDS);
+    bool erase_bonds = false;
+    clock_init();
+    ir_init();
+    pos_estimate_init();
+
+    // Do not start any interrupt that uses system functions before system initialisation.
+    // The best solution is to start the OS before any other initalisation.
+    if(USEBLUETOOTH)
+    {
+        BLE_init(); //Log_init ran from here, must be initialized after uart is initialized
+        arq_init(); // THIS is possibly also usefull when using thread, but FkIt for now
+    }
+
+    #if NRF_LOG_ENABLED
+		if (pdPASS != xTaskCreate(logger_thread, "LOGGER", 256, NULL, 1, &m_logger_thread))
+			APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
+	#endif
+    init_queues();
+    init_mutex();
+
+    // if (pdPASS != xTaskCreate(display_task, "DISP", 128, NULL, 1, &handle_display_task))
+    //     APP_ERROR_HANDLER(NRF_ERROR_NO_MEM); 
+
     if (pdPASS != xTaskCreate(user_task, "USER", 128, NULL, 4, &handle_user_task)) //needs elevated priority because init functions
         APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-    
-    /********************************************************************************************************************************************************* 
-     *Tasks used for testing drivers and hardware
-     * Not to be used in final application
-     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-    /*
-	if (pdPASS != xTaskCreate(IMU_tester, "IMU_Test", 256, NULL, 1 ,&imu_tester)){
-        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-    }
-    */
-    /*
-    if (pdPASS != xTaskCreate(Encoder_tester, "Encoder Test", 256, NULL, 1, &encoder_tester)){
-        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-    }
-    */
-    
-    /*
-    if (pdPASS != xTaskCreate(Encoder_tester_2, "Encoder Cnt Test", 256, NULL, 1, &encoder_with_counter_tester)){
-        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-    } 
-    */
-    
-    /*
-	if (pdPASS != xTaskCreate(IMU_tester, "IMU_Test", 256, NULL, 1 ,&imu_tester)){
-        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-    }
-    */
-   /*
-    if (pdPASS != xTaskCreate(Sensortower_tester, "SensortowerTest", 256, NULL, 1, &sensor_tower_tester)){
-        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-    }
-    */
-
-    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-     * End used for testing drivers and hardware
-     * Not to be used in final application
-     * ***********************************************************************************************************************************************************/
-
-
-
-
-    if (pdPASS != xTaskCreate(microsd_task, "SD", 256, NULL, 1, &handle_microsd_task))
-        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-    
-   	
-    if(USE_NEW_ESTIMATOR){
-        if (pdPASS != xTaskCreate(vNewMainPoseEstimatorTask, "POSE", 256, NULL, 3, &pose_estimator_task))
-            APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-    }else{
-        if (pdPASS != xTaskCreate(vMainPoseEstimatorTask, "POSE", 256, NULL, 3, &pose_estimator_task))
-            APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-    }  
-    
+    // if (pdPASS != xTaskCreate(Sensortower_tester, "SensortowerTest", 256, NULL, 1, &sensor_tower_tester)){
+    //     APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
+    // }
 
     if(USE_SPEED_CONTROLLER)
     {
-        	if (pdPASS != xTaskCreate(vMotorSpeedControllerTask, "SPEED", 256, NULL, 2, &motor_speed_controller_task))
-        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM); 
-
+        if (pdPASS != xTaskCreate(vMotorSpeedControllerTask, "SPEED", 256, NULL, 2, &motor_speed_controller_task))
+             APP_ERROR_HANDLER(NRF_ERROR_NO_MEM); 
     }
 
-
-    if (pdPASS != xTaskCreate(vMainPoseControllerTask, "POSC", 512, NULL, 1, &pose_controller_task))
-        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
+    // if (pdPASS != xTaskCreate(vMainPoseControllerTask, "POSC", 512, NULL, 1, &pose_controller_task))
+    //     APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
     
-    if (pdPASS != xTaskCreate(vMainSensorTowerTask, "SnsT", 256, NULL, 1, &sensor_tower_task))
-		APP_ERROR_HANDLER(NRF_ERROR_NO_MEM); 
+    // if (pdPASS != xTaskCreate(vMainSensorTowerTask, "SnsT", 256, NULL, 1, &sensor_tower_task))
+	// 	APP_ERROR_HANDLER(NRF_ERROR_NO_MEM); 
     
 	if (pdPASS != xTaskCreate(vMainCommunicationTask, "COM", 256, NULL, 1, &communication_task)) // Moved to this loop in order to use it for thread communications aswell
             APP_ERROR_HANDLER(NRF_ERROR_NO_MEM); 
     
-    
+	// /* Not ran when using thread */
+    // if (USEBLUETOOTH)
+    // {
+    //     if(pdPASS != xTaskCreate(vARQTask, "ARQ", 256, NULL, 2, &arq_task)) {
+    //         NRF_LOG_INFO("vARQTask Creation Failed");
+    //         APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
+    //     }
+    //     vTaskSuspend(arq_task);//suspend arq task to avoid start before init and avoids init before freertos start at same time
+    //     //    // Creates a FreeRTOS task for the BLE stack.
+    //     //    // The task will run advertising_start() before entering its loop.
+    //     nrf_sdh_freertos_init((nrf_sdh_freertos_task_hook_t) advertising_start,&erase_bonds);
 
-
-	/* Not ran when using thread */
-    if (USEBLUETOOTH)
-    {
-        if(pdPASS != xTaskCreate(vARQTask, "ARQ", 256, NULL, 2, &arq_task)) {
-            NRF_LOG_INFO("vARQTask Creation Failed");
-            APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-        }
-        vTaskSuspend(arq_task);//suspend arq task to avoid start before init and avoids init before freertos start at same time
-        //    // Creates a FreeRTOS task for the BLE stack.
-        //    // The task will run advertising_start() before entering its loop.
-        nrf_sdh_freertos_init((nrf_sdh_freertos_task_hook_t) advertising_start,&erase_bonds);
-
-    } 
-
-
+    // } 
 
     size_t freeHeapSize5 = xPortGetMinimumEverFreeHeapSize();
     NRF_LOG_INFO("EverFreeHeapSize5 %d", freeHeapSize5); //If 
-    NRF_LOG_INFO("\nInitialization done. SLAM application now starting.\n.");
+    NRF_LOG_INFO("\nInitialization done. SLAM application now starting.\n." + erase_bonds);
     if(PRINT_DEBUG)printf("Application starting");
     vTaskStartScheduler();
     for (;;) {

@@ -38,12 +38,12 @@ void Sensortower_tester(void *pvParameters) {
         uint16_t ir_reading = IrAnalogToMM(ir_read_blocking(sensor),sensor);
         uint16_t k = 0;
         for (int i = 0; i<10;i++){
-        uint16_t ir_raw_reading = ir_read_blocking(sensor);
-        k += ir_raw_reading;
-        vTaskDelay(40);
+            uint16_t ir_raw_reading = ir_read_blocking(sensor);
+            k += ir_raw_reading;
+            vTaskDelay(40);
         }
     //    printf("\n%d",k/10);
-        printf("\n%d", ir_reading);
+        NRF_LOG_INFO("\n%d", ir_reading);
         vTaskDelay(2000);
     }
 }

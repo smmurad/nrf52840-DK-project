@@ -49,15 +49,17 @@ static char                 m_client_id[]    		=  ROBOT_NAME;      /**< The MQTT
 
 void otTaskletsSignalPending(otInstance * p_instance)
 {
-    BaseType_t var = xTaskNotifyGive(mqtt_task);
-    UNUSED_VARIABLE(var);
+    NRF_LOG_INFO("otTaskletsSignalPending is called");
+    // BaseType_t var = xTaskNotifyGive(mqtt_task);
+    // UNUSED_VARIABLE(var);
 }
 
 void otSysEventSignalPending(void)
 {
+    NRF_LOG_INFO("otTaskletsSignalPending is called");
     static BaseType_t xHigherPriorityTaskWoken;
 
-    vTaskNotifyGiveFromISR(mqtt_task, &xHigherPriorityTaskWoken);
+    // vTaskNotifyGiveFromISR(mqtt_task, &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 }
 

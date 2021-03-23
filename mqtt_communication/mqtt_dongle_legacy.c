@@ -1,0 +1,1 @@
+#include "mqtt_dongle_legacy.h"
