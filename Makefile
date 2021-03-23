@@ -7,17 +7,12 @@ PROJ_DIR := .
 OUTPUT_DIRECTORY := _build
 
 $(OUTPUT_DIRECTORY)/nrf52840_xxaa.out: \
-  LINKER_SCRIPT  := $(PROJ_DIR)/config/ble_app_hrs_freertos_gcc_nrf52.ld
+  LINKER_SCRIPT  := $(PROJ_DIR)/config/linkerscript.ld
+  #$(PROJ_DIR)/config/ble_app_hrs_freertos_gcc_nrf52.ld
 
 # Source files common to all targets
 SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/mdk/gcc_startup_nrf52840.S \
-  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_backend_rtt.c \
-  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_backend_serial.c \
-  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_backend_uart.c \
-  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_default_backends.c \
-  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_frontend.c \
-  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_str_formatter.c \
   $(SDK_ROOT)/components/libraries/button/app_button.c \
   $(SDK_ROOT)/components/libraries/util/app_error.c \
   $(SDK_ROOT)/components/libraries/util/app_error_handler_gcc.c \
@@ -37,7 +32,6 @@ SRC_FILES += \
   $(SDK_ROOT)/external/fprintf/nrf_fprintf_format.c \
   $(SDK_ROOT)/components/libraries/fstorage/nrf_fstorage.c \
   $(SDK_ROOT)/components/libraries/fstorage/nrf_fstorage_sd.c \
-  $(SDK_ROOT)/components/libraries/experimental_memobj/nrf_memobj.c \
   $(SDK_ROOT)/components/libraries/experimental_section_vars/nrf_section_iter.c \
   $(SDK_ROOT)/components/libraries/strerror/nrf_strerror.c \
   $(SDK_ROOT)/components/libraries/sensorsim/sensorsim.c \
@@ -56,16 +50,11 @@ SRC_FILES += \
   $(SDK_ROOT)/external/thedotfactory_fonts/orkney8pts.c \
   $(SDK_ROOT)/components/boards/boards.c \
   $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_clock.c \
-  $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_uart.c \
   $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_twi.c \
   $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_ppi.c \
   $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_spi.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_clock.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_gpiote.c \
-  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_power_clock.c \
-  $(SDK_ROOT)/modules/nrfx/drivers/src/prs/nrfx_prs.c \
-  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uart.c \
-  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uarte.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_timer.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_ppi.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_twi.c \
@@ -96,7 +85,6 @@ SRC_FILES += \
   $(SDK_ROOT)/components/ble/peer_manager/peer_id.c \
   $(SDK_ROOT)/components/ble/peer_manager/peer_manager.c \
   $(SDK_ROOT)/components/ble/peer_manager/pm_buffer.c \
-  $(SDK_ROOT)/components/ble/peer_manager/pm_mutex.c \
   $(SDK_ROOT)/components/ble/peer_manager/security_dispatcher.c \
   $(SDK_ROOT)/components/ble/peer_manager/security_manager.c \
   $(SDK_ROOT)/components/ble/ble_services/ble_bas/ble_bas.c \
@@ -114,8 +102,6 @@ SRC_FILES += \
   $(SDK_ROOT)/components/libraries/gfx/nrf_gfx.c \
   $(SDK_ROOT)/components/libraries/spi_mngr/nrf_spi_mngr.c \
   $(SDK_ROOT)/components/libraries/fifo/app_fifo.c \
-  $(SDK_ROOT)/components/libraries/uart/app_uart_fifo.c \
-  $(SDK_ROOT)/components/libraries/uart/retarget.c \
   $(SDK_ROOT)/external/fatfs/port/diskio_blkdev.c \
   $(SDK_ROOT)/external/fatfs/src/ff.c \
   $(PROJ_DIR)/drivers/motor.c \
@@ -139,6 +125,8 @@ SRC_FILES += \
   $(PROJ_DIR)/ble_communication/buffer.c \
   $(PROJ_DIR)/ble_communication/simple_protocol.c \
   $(PROJ_DIR)/ble_communication/arq.c \
+  $(PROJ_DIR)/mqtt_communication/mqtt_dongle_legacy.c \
+  $(PROJ_DIR)/mqtt_communication/openTreadMQTT.c \
   $(PROJ_DIR)/software/ControllerTask.c \
   $(PROJ_DIR)/software/EstimatorTask.c \
   $(PROJ_DIR)/software/NewEstimatorTask.c \
@@ -155,8 +143,60 @@ SRC_FILES += \
   $(PROJ_DIR)/test_functions/EncoderWithCounterTester.c \
   $(PROJ_DIR)/test_functions/SensorTowerTester.c \
   $(PROJ_DIR)/test_functions/DebugFunctions.c \
+  $(SDK_ROOT)/components/libraries/bsp/bsp_thread.c \
+  $(SDK_ROOT)/components/thread/mqtt_sn/mqtt_sn_client/mqttsn_client.c \
+  $(SDK_ROOT)/components/thread/mqtt_sn/mqtt_sn_client/mqttsn_gateway_discovery.c \
+  $(SDK_ROOT)/components/thread/mqtt_sn/mqtt_sn_client/mqttsn_packet_fifo.c \
+  $(SDK_ROOT)/components/thread/mqtt_sn/mqtt_sn_client/mqttsn_packet_receiver.c \
+  $(SDK_ROOT)/components/thread/mqtt_sn/mqtt_sn_client/mqttsn_packet_sender.c \
+  $(SDK_ROOT)/components/thread/mqtt_sn/mqtt_sn_client/mqttsn_platform.c \
+  $(SDK_ROOT)/components/thread/mqtt_sn/mqtt_sn_client/mqttsn_transport_ot.c \
+  $(SDK_ROOT)/components/thread/utils/thread_utils.c \
+  $(SDK_ROOT)/external/paho/mqtt-sn/mqttsn_packet/MQTTSNConnectClient.c \
+  $(SDK_ROOT)/external/paho/mqtt-sn/mqttsn_packet/MQTTSNConnectServer.c \
+  $(SDK_ROOT)/external/paho/mqtt-sn/mqttsn_packet/MQTTSNDeserializePublish.c \
+  $(SDK_ROOT)/external/paho/mqtt-sn/mqttsn_packet/MQTTSNPacket.c \
+  $(SDK_ROOT)/external/paho/mqtt-sn/mqttsn_packet/MQTTSNSearchClient.c \
+  $(SDK_ROOT)/external/paho/mqtt-sn/mqttsn_packet/MQTTSNSearchServer.c \
+  $(SDK_ROOT)/external/paho/mqtt-sn/mqttsn_packet/MQTTSNSerializePublish.c \
+  $(SDK_ROOT)/external/paho/mqtt-sn/mqttsn_packet/MQTTSNSubscribeClient.c \
+  $(SDK_ROOT)/external/paho/mqtt-sn/mqttsn_packet/MQTTSNSubscribeServer.c \
+  $(SDK_ROOT)/external/paho/mqtt-sn/mqttsn_packet/MQTTSNUnsubscribeClient.c \
+  $(SDK_ROOT)/external/paho/mqtt-sn/mqttsn_packet/MQTTSNUnsubscribeServer.c \
+  $(SDK_ROOT)/components/thread/mqtt_sn/mqtt_sn_client/mqttsn_client.c \
+  $(SDK_ROOT)/components/thread/mqtt_sn/mqtt_sn_client/mqttsn_gateway_discovery.c \
+  $(SDK_ROOT)/components/thread/mqtt_sn/mqtt_sn_client/mqttsn_packet_fifo.c \
+  $(SDK_ROOT)/components/thread/mqtt_sn/mqtt_sn_client/mqttsn_packet_receiver.c \
+  $(SDK_ROOT)/components/thread/mqtt_sn/mqtt_sn_client/mqttsn_packet_sender.c \
+  $(SDK_ROOT)/components/thread/mqtt_sn/mqtt_sn_client/mqttsn_platform.c \
+  $(SDK_ROOT)/components/thread/mqtt_sn/mqtt_sn_client/mqttsn_transport_ot.c \
+  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_backend_rtt.c \
+  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_backend_serial.c \
+  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_default_backends.c \
+  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_frontend.c \
+  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_str_formatter.c \
+  $(SDK_ROOT)/components/libraries/experimental_memobj/nrf_memobj.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/prs/nrfx_prs.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uart.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uarte.c \
+  $(SDK_ROOT)/components/libraries/experimental_log/src/nrf_log_backend_uart.c \
+  $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_uart.c \
+  $(SDK_ROOT)/components/libraries/uart/retarget.c \
+  $(SDK_ROOT)/components/libraries/uart/app_uart_fifo.c \
+  $(SDK_ROOT)/components/libraries/mem_manager/mem_manager.c \
+  $(SDK_ROOT)/components/libraries/fstorage/nrf_fstorage.c \
+  $(SDK_ROOT)/components/libraries/fstorage/nrf_fstorage_nvmc.c \
+  $(SDK_ROOT)/components/libraries/fstorage/nrf_fstorage_sd.c \
+  $(SDK_ROOT)/modules/nrfx/hal/nrf_nvmc.c \
+ 
+
+
 # Include folders common to all targets
 INC_FOLDERS += \
+  $(SDK_ROOT)/components/libraries/experimental_log \
+  $(SDK_ROOT)/components/libraries/experimental_log/src \
+  $(SDK_ROOT)/components/libraries/experimental_memobj \
+  $(SDK_ROOT)/components/libraries/experimental_mpu \
   $(PROJ_DIR)/config \
   $(SDK_ROOT)/components/nfc/ndef/generic/message \
   $(SDK_ROOT)/components/nfc/t2t_lib \
@@ -168,20 +208,16 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/usbd/class/hid/generic \
   $(SDK_ROOT)/components/libraries/usbd/class/msc \
   $(SDK_ROOT)/components/libraries/usbd/class/hid \
-  $(SDK_ROOT)/components/libraries/experimental_log \
-  $(SDK_ROOT)/components/libraries/uart \
   $(SDK_ROOT)/components/libraries/fifo \
   $(SDK_ROOT)/components/ble/ble_services/ble_gls \
   $(SDK_ROOT)/components/libraries/fstorage \
   $(SDK_ROOT)/components/nfc/ndef/text \
   $(SDK_ROOT)/components/libraries/mutex \
   $(SDK_ROOT)/components/libraries/gpiote \
-  $(SDK_ROOT)/components/libraries/experimental_log/src \
   $(SDK_ROOT)/components/libraries/bootloader/ble_dfu \
   $(SDK_ROOT)/components/nfc/ndef/connection_handover/common \
   $(SDK_ROOT)/components/boards \
   $(SDK_ROOT)/components/nfc/ndef/generic/record \
-  $(SDK_ROOT)/components/libraries/experimental_memobj \
   $(SDK_ROOT)/components/nfc/t4t_parser/cc_file \
   $(SDK_ROOT)/components/ble/ble_advertising \
   $(SDK_ROOT)/components/ble/ble_services/ble_bas_c \
@@ -205,11 +241,9 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/ble/ble_services/ble_ans_c \
   $(SDK_ROOT)/components/libraries/slip \
   $(SDK_ROOT)/components/libraries/delay \
-  $(SDK_ROOT)/components/libraries/experimental_mpu \
   $(SDK_ROOT)/components/libraries/mem_manager \
   $(SDK_ROOT)/components/libraries/csense_drv \
   $(SDK_ROOT)/components/ble/ble_services/ble_nus_c \
-  $(SDK_ROOT)/components/libraries/usbd/config \
   $(SDK_ROOT)/components/softdevice/common \
   $(SDK_ROOT)/components/ble/ble_services/ble_ias \
   $(SDK_ROOT)/components/libraries/usbd/class/hid/mouse \
@@ -242,7 +276,6 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/nfc/t4t_parser/tlv \
   $(SDK_ROOT)/components/libraries/sortlist \
   $(SDK_ROOT)/components/libraries/spi_mngr \
-  $(SDK_ROOT)/components/libraries/experimental_stack_guard \
   $(SDK_ROOT)/components/libraries/led_softblink \
   $(SDK_ROOT)/components/nfc/ndef/conn_hand_parser \
   $(SDK_ROOT)/components/libraries/sdcard \
@@ -266,11 +299,9 @@ INC_FOLDERS += \
   $(SDK_ROOT)/external/segger_rtt \
   $(SDK_ROOT)/components/nfc/ndef/connection_handover/ble_pair_msg \
   $(SDK_ROOT)/components/libraries/usbd/class/audio \
-  $(SDK_ROOT)/components/nfc/t4t_lib/hal_t4t \
   $(SDK_ROOT)/components/libraries/sensorsim \
   $(SDK_ROOT)/components/nfc/t4t_lib \
   $(SDK_ROOT)/components/ble/peer_manager \
-  $(SDK_ROOT)/components/drivers_nrf/usbd \
   $(SDK_ROOT)/components/ble/ble_services/ble_tps \
   $(SDK_ROOT)/components/nfc/ndef/parser/message \
   $(SDK_ROOT)/components/ble/ble_services/ble_dis \
@@ -285,7 +316,6 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/usbd \
   $(SDK_ROOT)/components/nfc/ndef/connection_handover/ep_oob_rec \
   $(SDK_ROOT)/components/libraries/atomic_fifo \
-  $(SDK_ROOT)/components/libraries/experimental_ringbuf \
   $(SDK_ROOT)/components/ble/ble_services/ble_lbs_c \
   $(SDK_ROOT)/components/nfc/ndef/connection_handover/ble_pair_lib \
   $(SDK_ROOT)/components/libraries/crypto \
@@ -295,7 +325,6 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/atomic_flags \
   $(SDK_ROOT)/components/ble/ble_services/ble_rscs \
   $(SDK_ROOT)/components/nfc/ndef/connection_handover/hs_rec \
-  $(SDK_ROOT)/components/nfc/t2t_lib/hal_t2t \
   $(SDK_ROOT)/components/nfc/ndef/conn_hand_parser/ac_rec_parser \
   $(SDK_ROOT)/components/ble/ble_services/ble_hrs \
   $(SDK_ROOT)/components/libraries/twi_mngr \
@@ -314,11 +343,29 @@ INC_FOLDERS += \
   $(SDK_ROOT)/external/thedotfactory_fonts \
   $(PROJ_DIR)/drivers \
   $(PROJ_DIR)/ble_communication \
+  $(PROJ_DIR)/mqtt_communication \
   $(PROJ_DIR)/software \
   $(PROJ_DIR)/test_functions \
+  $(SDK_ROOT)/components/thread/utils \
+  $(SDK_ROOT)/external/openthread/include \
+  $(SDK_ROOT)/components/thread/mqtt_sn/mqtt_sn_client \
+  $(SDK_ROOT)/external/paho/mqtt-sn/mqttsn_packet \
+  $(SDK_ROOT)/components/thread/mqtt_sn/mqtt_sn_client \
+  $(SDK_ROOT)/components/libraries/uart \
+  $(SDK_ROOT)/components/libraries/mem_manager/ \
+  $(SDK_ROOT)/components/libraries/fstorage/ \
 
 # Libraries common to all targets
 LIB_FILES += \
+  $(SDK_ROOT)/external/openthread/lib/nrf52840/gcc/libopenthread-cli-ftd.a \
+  $(SDK_ROOT)/external/openthread/lib/nrf52840/gcc/libopenthread-diag.a \
+  $(SDK_ROOT)/external/openthread/lib/nrf52840/gcc/libopenthread-ftd.a \
+  $(SDK_ROOT)/external/openthread/lib/nrf52840/gcc/libopenthread-platform-utils.a \
+  $(SDK_ROOT)/external/openthread/lib/nrf52840/gcc/libmbedcrypto.a \
+  $(SDK_ROOT)/external/openthread/lib/nrf52840/gcc/libopenthread-nrf52840-sdk.a \
+  $(SDK_ROOT)/external/nrf_cc310/lib/cortex-m4/hard-float/libnrf_cc310_0.9.12.a \
+  $(SDK_ROOT)/external/openthread/lib/nrf52840/gcc/libnordicsemi-nrf52840-radio-driver.a \
+  $(SDK_ROOT)/external/openthread/lib/nrf52840/gcc/libopenthread-platform-utils.a \
 
 # Optimization flags
 OPT = -O3 -g3 -DDEBUG
@@ -332,6 +379,7 @@ CFLAGS += -DCONFIG_GPIO_AS_PINRESET
 CFLAGS += -DFLOAT_ABI_HARD
 CFLAGS += -DFREERTOS
 CFLAGS += -DNRF52840_XXAA
+CFLAGS += -DOPENTHREAD_FTD=1
 CFLAGS += -DNRF_SD_BLE_API_VERSION=6
 CFLAGS += -DS140
 CFLAGS += -DSOFTDEVICE_PRESENT
@@ -356,6 +404,7 @@ ASMFLAGS += -DCONFIG_GPIO_AS_PINRESET
 ASMFLAGS += -DFLOAT_ABI_HARD
 ASMFLAGS += -DFREERTOS
 ASMFLAGS += -DNRF52840_XXAA
+ASMFLAGS += -DOPENTHREAD_FTD=1
 ASMFLAGS += -DNRF_SD_BLE_API_VERSION=6
 ASMFLAGS += -DS140
 ASMFLAGS += -DSOFTDEVICE_PRESENT
@@ -412,7 +461,7 @@ flash: $(OUTPUT_DIRECTORY)/nrf52840_xxaa.hex
 # Flash softdevice
 flash_softdevice:
 	@echo Flashing: s140_nrf52_6.0.0_softdevice.hex
-	nrfjprog -f nrf52 --program $(SDK_ROOT)/components/softdevice/s140/hex/s140_nrf52_6.0.0_softdevice.hex --sectorerase
+	nrfjprog -f nrf52 --program $(SDK_ROOT)/components/softdevice/s140/hex/s140_nrf52_6.1.1_softdevice.hex --sectorerase
 	nrfjprog -f nrf52 --reset
 
 erase:
