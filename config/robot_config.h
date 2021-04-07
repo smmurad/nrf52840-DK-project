@@ -70,8 +70,8 @@
  *
  ****************************************************************************************************************/
 
-#define USEBLUETOOTH 1 			// For switching between nRF51 bluetooth dongle and NRF52840 Thread dongle
-#define USE_NEW_SERVER 0		// For switching between Grindvik and Mullins' server versions
+#define USEBLUETOOTH 0 			// For switching between nRF51 bluetooth dongle and NRF52840 Thread dongle
+#define USE_NEW_SERVER 1		// For switching between Grindvik and Mullins' server versions
 #define VALIDATE_WAYPOINT 0		// If false, all waypoints are processed. If true, waypoints inside collision sectors are discarded.
 
 

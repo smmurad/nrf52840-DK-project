@@ -312,7 +312,7 @@ int main(void)
     // The best solution is to start the OS before any other initalisation.
     if(USEBLUETOOTH)
     {
-        BLE_init(); //Log_init ran from here, must be initialized after uart is initialized
+        BLE_init(); // Log_init ran from here, must be initialized after uart is initialized
         arq_init(); // THIS is possibly also usefull when using thread, but FkIt for now
     }
 
@@ -359,7 +359,6 @@ int main(void)
     //     //    // Creates a FreeRTOS task for the BLE stack.
     //     //    // The task will run advertising_start() before entering its loop.
     //     nrf_sdh_freertos_init((nrf_sdh_freertos_task_hook_t) advertising_start,&erase_bonds);
-
     // } 
 
     size_t freeHeapSize5 = xPortGetMinimumEverFreeHeapSize();

@@ -135,6 +135,8 @@ void vMainCommunicationTask(void *pvParameters){
 			i2c_reciveNOADDR(I2C_DEVICE_DONGLE, message, 8);
 			
 			if(USE_NEW_SERVER){
+				
+				NRF_LOG_INFO("[MainComTask] Use new server is true.");
 				switch(message[1]){ // message[0] is the adress of the dongle, 0x72, if the received data is new
 			
 					case START_POSITION: 
@@ -182,6 +184,7 @@ void vMainCommunicationTask(void *pvParameters){
 						break;
 					default:
 					
+						NRF_LOG_INFO("[MainComTask] Case Default");
 						break;
 				}
 			}else{ // There is only one message coming from the old C++ server, which is a new waypoint
