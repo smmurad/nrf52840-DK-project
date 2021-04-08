@@ -77,7 +77,7 @@ void IMU_tester(void *pvParameters){
         //printf("\n%d",g_z);
         printf("\nAccel X = %.2f",accel.x-accelXoffset);
         printf("\nAccel Y = %.2f",accel.y-accelYoffset);
-       // NRF_LOG_INFO("gyro z: " NRF_LOG_FLOAT_MARKER "\t\t\r\n", NRF_LOG_FLOAT(gyro.z));
+        NRF_LOG_INFO("gyro z: " NRF_LOG_FLOAT_MARKER "\t\t\r\n", NRF_LOG_FLOAT(gyro.z));
         vTaskDelay(250);
     }
 }

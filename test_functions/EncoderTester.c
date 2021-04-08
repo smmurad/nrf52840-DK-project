@@ -43,7 +43,7 @@ void Encoder_tester(void *pvParameters) {
         //dTheta = (dRight - dLeft) / WHEELBASE_MM;
         (void)dTheta;
         //vMotorMovementSwitch(25,25);
-       // NRF_LOG_INFO("Motor driving");
+        NRF_LOG_INFO("Motor driving");
         //vTaskDelay(1000);
         //motor_stop();
         //motor_backward(50);

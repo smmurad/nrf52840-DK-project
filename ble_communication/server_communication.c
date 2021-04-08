@@ -103,13 +103,13 @@ void send_update(int16_t x_cm, int16_t y_cm, int16_t heading_deg, int16_t towerA
   memcpy(data, (uint8_t*) &msg, sizeof(data));
   if(use_arq[TYPE_UPDATE]){
     arq_send(server_connection, data, sizeof(data));
-   // NRF_LOG_INFO("Update message sent");
+    NRF_LOG_INFO("Update message sent");
   } 
   else simple_p_send(SERVER_ADDRESS, data, sizeof(data));
 }
 
 void send_idle(void) {
- // NRF_LOG_INFO("IDLE connected is %d", connected);
+  NRF_LOG_INFO("IDLE connected is %d", connected);
   if(!connected) return;
   uint8_t status = TYPE_IDLE;
   if(use_arq[TYPE_IDLE]) arq_send(server_connection, &status, 1);
@@ -133,7 +133,7 @@ void debug(const char *fmt, ...) {
 }
 
 void send_ping_response(void) {
- // NRF_LOG_INFO("PING connected is %d", connected);
+  NRF_LOG_INFO("PING connected is %d", connected);
   if(!connected) return;
   uint8_t status = TYPE_PING_RESPONSE;
   if(use_arq[TYPE_PING_RESPONSE]) arq_send(server_connection, &status, 1);
