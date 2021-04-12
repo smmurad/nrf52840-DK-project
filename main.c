@@ -343,8 +343,7 @@ void otSysEventSignalPending(void)
 
 static void state_changed_callback(uint32_t flags, void * p_context)
 {
-    NRF_LOG_INFO("State changed! Flags: 0x%08x Current role: %d\r\n",
-    //              flags, otThreadGetDeviceRole(p_context));
+    NRF_LOG_INFO("State changed! Flags: 0x%08x Current role: %d\r\n", flags, otThreadGetDeviceRole(p_context));
 }
 
 
@@ -642,12 +641,10 @@ static void thread_stack_task(void * arg)
     }
 }
 
-void initialize_system(){
-    log_init();
-    scheduler_init();
-    timer_init();
-    gpio_init();
-    thread_instance_init(); 
+void pos_estimate_init()
+{
+    position_estimate_t pos_est = {0,0,0};
+    set_position_estimate(&pos_est);
 }
 
 ////////////////////// END OF CODE gotten from hunshamar //////////////////////////////
@@ -726,10 +723,7 @@ static void user_task(void *arg) {
 				time = 0;
 			}
 		}
-		
     }
-
-    
 }
 
 
@@ -740,11 +734,7 @@ static void user_task(void *arg) {
 */
 
 
-void pos_estimate_init()
-{
-    position_estimate_t pos_est = {0,0,0};
-    set_position_estimate(&pos_est);
-}
+
 
 void init_queues()
 {
@@ -770,45 +760,24 @@ void init_mutex()
 	xCommandReadyBSem = xSemaphoreCreateBinary();
 }
 
-void MqttTestInit()
-{
-    initialize_system();
-    
-    // Start thread stack execution.
-    if (pdPASS != xTaskCreate(thread_stack_task, "THR", THREAD_STACK_TASK_STACK_SIZE, NULL, 2, &m_app.thread_stack_task))
-    {
-        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-    }
-    
-    #if NRF_LOG_ENABLED
-      
-
-    Start execution.
-    if (pdPASS != xTaskCreate(logger_thread, "LOG", LOG_TASK_STACK_SIZE, NULL, 1, &m_app.logger_task))
-    {
-        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-    }
-    #endif // NRF_LOG_ENABLED
-
-    /* Start FreeRTOS scheduler. */
-    vTaskStartScheduler();
-
-    while (true)
-    {
-        /* FreeRTOS should not be here... FreeRTOS goes back to the start of stack
-         * in vTaskStartScheduler function. */
-    }
+void initialize_system(){
+    bsp_board_init(BSP_INIT_LEDS);
+    log_init();
+    scheduler_init();
+    timer_init();
+    gpio_init();
+    thread_instance_init(); 
+    // clock_init();
+    ir_init();
+    pos_estimate_init();
 }
 
 int main(void) 
 {
     NRF_LOG_INFO("IM ALIVE!");
-
-    bsp_board_init(BSP_INIT_LEDS);
     bool erase_bonds = false;
-    clock_init();
-    ir_init();
-    pos_estimate_init();
+
+    initialize_system();
 
     // Do not start any interrupt that uses system functions before system initialisation.
     // The best solution is to start the OS before any other initalisation.
@@ -849,11 +818,23 @@ int main(void)
     
 	if (pdPASS != xTaskCreate(vMainCommunicationTask, "COM", 256, NULL, 1, &communication_task)) // Moved to this loop in order to use it for thread communications aswell
             APP_ERROR_HANDLER(NRF_ERROR_NO_MEM); 
-    
 
-    // HUNSHAMAR CODE
-    MqttTestInit();
-    // END OF HUNSHAMAR CODE
+    // Start thread stack execution.
+    if (pdPASS != xTaskCreate(thread_stack_task, "THR", THREAD_STACK_TASK_STACK_SIZE, NULL, 2, &m_app.thread_stack_task))
+    {
+        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
+    }
+    
+    #if NRF_LOG_ENABLED
+      
+
+    //Start execution.
+    if (pdPASS != xTaskCreate(logger_thread, "LOG", LOG_TASK_STACK_SIZE, NULL, 1, &m_app.logger_task))
+    {
+        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
+    }
+    #endif // NRF_LOG_ENABLED
+    
 
 	// /* Not ran when using thread */
     // if (USEBLUETOOTH)
