@@ -67,7 +67,7 @@
 #include "software/globals.h"
 //#include "encoder.h"
 #include "encoder_with_counter.h"
-#include "i2c.h"
+// #include "i2c.h"
 #include "ir.h"
 //#include "mag3110.h"
 #include "microsd.h"
@@ -225,7 +225,7 @@ SemaphoreHandle_t xTickBSem;
 SemaphoreHandle_t xControllerBSem;
 SemaphoreHandle_t xCommandReadyBSem;
 SemaphoreHandle_t mutex_spi;
-SemaphoreHandle_t mutex_i2c;
+// SemaphoreHandle_t mutex_i2c;
 //SemaphoreHandle_t xCollisionMutex;
 
 
@@ -674,7 +674,7 @@ static void user_task(void *arg) {
     encoder_init_int();
     //encoder_with_counter_init();
     taskEXIT_CRITICAL();
-    i2c_init();
+    // i2c_init();
     vTaskDelay(30);
     IMU_init();
 
@@ -752,7 +752,7 @@ void init_mutex()
 {
     //initialize mutexes
 	mutex_spi = xSemaphoreCreateMutex();
-    mutex_i2c = xSemaphoreCreateMutex();
+    // mutex_i2c = xSemaphoreCreateMutex();
 	xPoseMutex = xSemaphoreCreateMutex();       // Global variables for robot pose. Only updated from estimator, accessed from many
 	xTickBSem = xSemaphoreCreateBinary();       // Global variable to hold robot tick values
     xSemaphoreGive(xTickBSem);
@@ -774,7 +774,6 @@ void initialize_system(){
 
 int main(void) 
 {
-    NRF_LOG_INFO("IM ALIVE!");
     bool erase_bonds = false;
 
     initialize_system();
@@ -824,16 +823,6 @@ int main(void)
     {
         APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
     }
-    
-    #if NRF_LOG_ENABLED
-      
-
-    //Start execution.
-    if (pdPASS != xTaskCreate(logger_thread, "LOG", LOG_TASK_STACK_SIZE, NULL, 1, &m_app.logger_task))
-    {
-        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-    }
-    #endif // NRF_LOG_ENABLED
     
 
 	// /* Not ran when using thread */

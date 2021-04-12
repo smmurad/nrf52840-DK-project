@@ -118,7 +118,7 @@ void sendNewPoseMessage(int16_t x, int16_t y, float theta, int8_t servoAngle, in
             data[23] &= ~(1 << ((NUM_DIST_SENSORS-i)-1));
         }
     }
-	i2c_sendNOADDR(I2C_DEVICE_DONGLE, data, msgLength);
+	// i2c_sendNOADDR(I2C_DEVICE_DONGLE, data, msgLength); 
 }
 
 
@@ -148,7 +148,7 @@ void sendOldPoseMessage(int16_t x, int16_t y, float theta, int8_t servoAngle, in
             data[5] = (xObject >> 8);
             data[6] = (yObject & 0xFF);
             data[7] = (yObject >> 8);
-            i2c_sendNOADDR(I2C_DEVICE_DONGLE, data, msgLength);
+            // i2c_sendNOADDR(I2C_DEVICE_DONGLE, data, msgLength);
         }
     }
 }
@@ -156,7 +156,7 @@ void sendOldPoseMessage(int16_t x, int16_t y, float theta, int8_t servoAngle, in
 void sendScanBorder(){
 	uint8_t msgLength = 1;
 	uint8_t scanBorderID = 1;
-	i2c_sendNOADDR(I2C_DEVICE_DONGLE, &scanBorderID, msgLength);
+	// i2c_sendNOADDR(I2C_DEVICE_DONGLE, &scanBorderID, msgLength);
 }
 
 
