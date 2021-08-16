@@ -13,6 +13,7 @@ $(OUTPUT_DIRECTORY)/nrf52840_xxaa.out: \
 # Source files common to all targets
 SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/mdk/gcc_startup_nrf52840.S \
+  $(PROJ_DIR)/main.c \
   $(SDK_ROOT)/components/libraries/button/app_button.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_rtt.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_serial.c \
@@ -179,7 +180,6 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/drivers/src/prs/nrfx_prs.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uart.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uarte.c \
-  $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_uart.c \
   $(SDK_ROOT)/components/libraries/uart/retarget.c \
   $(SDK_ROOT)/components/libraries/uart/app_uart_fifo.c \
   $(SDK_ROOT)/components/libraries/mem_manager/mem_manager.c \
@@ -187,7 +187,6 @@ SRC_FILES += \
   $(SDK_ROOT)/components/libraries/fstorage/nrf_fstorage_nvmc.c \
   $(SDK_ROOT)/components/libraries/fstorage/nrf_fstorage_sd.c \
   $(SDK_ROOT)/modules/nrfx/hal/nrf_nvmc.c \
-  $(PROJ_DIR)/main.c \
 
 
 # Include folders common to all targets
@@ -276,8 +275,8 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/led_softblink \
   $(SDK_ROOT)/components/nfc/ndef/conn_hand_parser \
   $(SDK_ROOT)/components/libraries/sdcard \
-  $(SDK_ROOT)/components/nfc/ndef/parser/record \
   $(SDK_ROOT)/integration/nrfx \
+  $(SDK_ROOT)/components/nfc/ndef/parser/record \
   $(SDK_ROOT)/integration/nrfx/legacy \
   $(SDK_ROOT)/modules/nrfx \
   $(SDK_ROOT)/modules/nrfx/mdk \
@@ -363,7 +362,6 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/mem_manager \
   $(SDK_ROOT)/external/freertos/config \
   $(SDK_ROOT)/components/libraries/util \
-  $(SDK_ROOT)/external/openthread/include \
   $(SDK_ROOT)/components/libraries/balloc \
   $(SDK_ROOT)/components/libraries/ringbuf \
   $(SDK_ROOT)/modules/nrfx/hal \
@@ -412,6 +410,7 @@ CFLAGS += -DCONFIG_GPIO_AS_PINRESET
 CFLAGS += -DFLOAT_ABI_HARD
 CFLAGS += -DFREERTOS
 CFLAGS += -DNRF52840_XXAA
+CFLAGS += -DOPENTHREAD_ENABLE_APPLICATION_COAP
 CFLAGS += -DOPENTHREAD_FTD=1
 CFLAGS += -DNRF_SD_BLE_API_VERSION=6
 CFLAGS += -DS140
@@ -437,6 +436,7 @@ ASMFLAGS += -DCONFIG_GPIO_AS_PINRESET
 ASMFLAGS += -DFLOAT_ABI_HARD
 ASMFLAGS += -DFREERTOS
 ASMFLAGS += -DNRF52840_XXAA
+ASMFLAGS += -DOPENTHREAD_ENABLE_APPLICATION_COAP
 ASMFLAGS += -DOPENTHREAD_FTD=1
 ASMFLAGS += -DNRF_SD_BLE_API_VERSION=6
 ASMFLAGS += -DS140

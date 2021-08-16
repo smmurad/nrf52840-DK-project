@@ -7,6 +7,7 @@
 
 #include "app_scheduler.h"
 #include "nordic_common.h"
+
 #include "nrf.h"
 #include "nrf_drv_gpiote.h"
 #include "app_error.h"
@@ -19,6 +20,7 @@
 #include "ble_hrs.h"
 #include "ble_dis.h"
 #include "ble_conn_params.h"
+
 #include "sensorsim.h"
 #include "nrf_sdh.h"
 #include "nrf_sdh_soc.h"
@@ -96,11 +98,10 @@
 #include "mqttsn_client.h"
 
 
-
 #define NRF_LOG_ENABLED 1
 
 #if NRF_LOG_ENABLED
-static TaskHandle_t m_logger_thread;                                /**< Definition of Logger thread. */
+static TaskHandle_t m_logger_thread;                                        /**< Definition of Logger thread. */
 #define SCHED_QUEUE_SIZE       32                                           /**< Maximum number of events in the scheduler queue. */
 #define SCHED_EVENT_DATA_SIZE  APP_TIMER_SCHED_EVENT_DATA_SIZE              /**< Maximum app_scheduler event size. */
 
@@ -183,10 +184,10 @@ static uint8_t              m_gateway_id;                      /**< A gateway ID
 static mqttsn_connect_opt_t m_connect_opt;                     /**< Connect options for the MQTT-SN client. */
 static uint16_t             m_msg_id_sub           = 0;        /**< Message ID thrown with MQTTSN_EVENT_TIMEOUT. */
 static uint16_t             m_msg_id_pub           = 0;        /**< Message ID thrown with MQTTSN_EVENT_TIMEOUT. */
-static bool                 m_subscribed       = 0;            /**< Current subscription state. */
-static char                 m_client_id[]    =  MQTT_ID;      /**< The MQTT-SN Client's ID. */
+static bool                 m_subscribed           = 0;        /**< Current subscription state. */
+static char                 m_client_id[]          = MQTT_ID;  /**< The MQTT-SN Client's ID. */
 
-static char                 m_topic_pub_name[]   =  MQTT_PUB;  /**< Name of the topic to publish to. */
+static char                 m_topic_pub_name[]     = MQTT_PUB; /**< Name of the topic to publish to. */
 static mqttsn_topic_t       m_topic_pub            =           /**< Topic corresponding to publisher>*/
 {
     .p_topic_name = (unsigned char *)m_topic_pub_name,
@@ -265,7 +266,6 @@ int LeftMotorDirection = 1;
 uint8_t tx_message[MESSAGE_LENGTH] = "publish msg"; 
 void in_pin_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
-
     nrf_drv_gpiote_out_toggle(PIN_OUT);
     uint32_t ec = mqttsn_client_publish(&m_client, m_topic_pub.topic_id, tx_message, MESSAGE_LENGTH, &m_msg_id_pub);
     if (ec != NRF_SUCCESS)
@@ -319,6 +319,7 @@ static inline void light_off(void)
     LEDS_OFF(BSP_LED_3_MASK);
 }
 
+
 /***************************************************************************************************
  * @section Signal handling
  **************************************************************************************************/
@@ -336,6 +337,7 @@ void otSysEventSignalPending(void)
     vTaskNotifyGiveFromISR(m_app.thread_stack_task, &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 }
+
 
 /***************************************************************************************************
  * @section State change handling
@@ -431,6 +433,7 @@ static void connected_callback(void)
     subscribe();
 }
 
+
 /**@brief Processes DISCONNECT message from a gateway. */
 static void disconnected_callback(void)
 {
@@ -446,7 +449,6 @@ static void regack_callback(mqttsn_event_t * p_event)
     m_topic_pub.topic_id = p_event->event_data.registered.packet.topic.topic_id;
     NRF_LOG_INFO("MQTT-SN event: Topic has been registered with ID: %d.\r\n", p_event->event_data.registered.packet.topic.topic_id);
 }
-
 
 static void received_callback(mqttsn_event_t * p_event)
 {
@@ -464,13 +466,16 @@ static void received_callback(mqttsn_event_t * p_event)
 /**@brief Processes retransmission limit reached event. */
 static void timeout_callback(mqttsn_event_t * p_event)
 {
-    NRF_LOG_INFO("MQTT-SN event: Timed-out message: %d. Message ID: %d.\r\n",                  p_event->event_data.error.msg_type,                  p_event->event_data.error.msg_id);
+    NRF_LOG_INFO("MQTT-SN event: Timed-out message: %d. Message ID: %d.\r\n",
+                p_event->event_data.error.msg_type,
+                p_event->event_data.error.msg_id);
 }
 
 /**@brief Processes results of gateway discovery procedure. */
 static void searchgw_timeout_callback(mqttsn_event_t * p_event)
 {
-    NRF_LOG_INFO("MQTT-SN event: Gateway discovery result: 0x%x.\r\n", p_event->event_data.discovery);
+    NRF_LOG_INFO("MQTT-SN event: Gateway discovery result: 0x%x.\r\n",
+                p_event->event_data.discovery);
 }
 
 
@@ -527,8 +532,7 @@ void mqttsn_evt_handler(mqttsn_client_t * p_client, mqttsn_event_t * p_event)
             searchgw_timeout_callback(p_event);
 
             // topic registered
-
-                uint32_t err_code;
+            uint32_t err_code;
 
             if (mqttsn_client_state_get(&m_client) == MQTTSN_CLIENT_CONNECTED)
             {
@@ -546,7 +550,6 @@ void mqttsn_evt_handler(mqttsn_client_t * p_client, mqttsn_event_t * p_event)
                     NRF_LOG_INFO("CONNECT message could not be sent. Error: 0x%x\r\n", err_code);
                 }
             }
-
             break;
 
         default:
@@ -572,7 +575,7 @@ static void thread_instance_init(void)
 {
     thread_configuration_t thread_configuration =
     {
-        .radio_mode        = THREAD_RADIO_MODE_RX_ON_WHEN_IDLE, // Changed from .role, since thread_utils.h might have changed it with radio_mode
+        .role                 = RX_ON_WHEN_IDLE,
         .autocommissioning = true,
     };
 
@@ -583,7 +586,7 @@ static void thread_instance_init(void)
 
 /**@brief Function for initializing the nrf log module.
  */
-static void log_init(void) // THIS METHOD MIGHT BE KILLED
+static void log_init(void)
 {
     ret_code_t err_code = NRF_LOG_INIT(NULL);
     APP_ERROR_CHECK(err_code);
@@ -641,6 +644,8 @@ static void thread_stack_task(void * arg)
     }
 }
 
+
+
 void pos_estimate_init()
 {
     position_estimate_t pos_est = {0,0,0};
@@ -649,6 +654,7 @@ void pos_estimate_init()
 
 ////////////////////// END OF CODE gotten from hunshamar //////////////////////////////
 
+// Sigurds scan line
 
 /**@brief User task
  *
@@ -676,7 +682,7 @@ static void user_task(void *arg) {
     taskEXIT_CRITICAL();
     // i2c_init();
     vTaskDelay(30);
-    IMU_init();
+    // IMU_init();
 
     vTaskDelay(1500);
     setMotorSpeedReference(60,60);
@@ -684,7 +690,7 @@ static void user_task(void *arg) {
     vTaskPrioritySet(handle_user_task, 1);
     vTaskDelay(5000);
 
-    NRF_LOG_INFO("IMU reading: %d\n\r", g_IMU_float_gyroX());
+    // NRF_LOG_INFO("IMU reading: %d\n\r", g_IMU_float_gyroX());
 
     //mag_init(MAG_OS_128);//oversampling rate used to set datarate 16->80hz 32->40hz 64->20hz 128->10hz
     //the rest of this is just used for testing and displaying values
@@ -734,8 +740,6 @@ static void user_task(void *arg) {
 */
 
 
-
-
 void init_queues()
 {
     //initialize queues
@@ -772,6 +776,8 @@ void initialize_system(){
     pos_estimate_init();
 }
 
+// Sigurds scan line
+
 int main(void) 
 {
     bool erase_bonds = false;
@@ -785,7 +791,6 @@ int main(void)
         // BLE_init(); // Log_init ran from here, must be initialized after uart is initialized
         // arq_init(); // THIS is possibly also usefull when using thread, but FkIt for now
     }
-
     #if NRF_LOG_ENABLED
 		if (pdPASS != xTaskCreate(logger_thread, "LOGGER", 256, NULL, 1, &m_logger_thread))
 			APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
@@ -815,8 +820,8 @@ int main(void)
     // if (pdPASS != xTaskCreate(vMainSensorTowerTask, "SnsT", 256, NULL, 1, &sensor_tower_task))
 	// 	APP_ERROR_HANDLER(NRF_ERROR_NO_MEM); 
     
-	if (pdPASS != xTaskCreate(vMainCommunicationTask, "COM", 256, NULL, 1, &communication_task)) // Moved to this loop in order to use it for thread communications aswell
-            APP_ERROR_HANDLER(NRF_ERROR_NO_MEM); 
+	// if (pdPASS != xTaskCreate(vMainCommunicationTask, "COM", 256, NULL, 1, &communication_task)) // Moved to this loop in order to use it for thread communications aswell
+    //         APP_ERROR_HANDLER(NRF_ERROR_NO_MEM); 
 
     // Start thread stack execution.
     if (pdPASS != xTaskCreate(thread_stack_task, "THR", THREAD_STACK_TASK_STACK_SIZE, NULL, 2, &m_app.thread_stack_task))
@@ -839,7 +844,7 @@ int main(void)
     // } 
 
     size_t freeHeapSize5 = xPortGetMinimumEverFreeHeapSize();
-    NRF_LOG_INFO("EverFreeHeapSize5 %d", freeHeapSize5); //If 
+    NRF_LOG_INFO("EverFreeHeapSize5 %d", freeHeapSize5);
     NRF_LOG_INFO("\nInitialization done. SLAM application now starting.\n." + erase_bonds);
     if(PRINT_DEBUG)printf("Application starting");
     vTaskStartScheduler();
